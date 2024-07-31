@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <!-- 이거는 api 나오면 넣을 예정. 일단 map이 들어갈 자리. -->
+  <!--  <fragment
+        android:layout_height="150dp"
+        android:layout_width="match_parent"
+        />-->
+
+    <TextView
+        android:id="@+id/toilet_name"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="화장실 이름"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        />
+    <TextView
+        android:id="@+id/toilet_address"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="화장실 주소"
+        android:textSize="25sp"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@android:color/black"
+        />
+
+</LinearLayout>
