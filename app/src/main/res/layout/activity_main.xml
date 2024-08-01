@@ -32,11 +32,11 @@
             android:id="@+id/buttons_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="#F0F0F0"
+            android:background="@color/white"
             android:gravity="center"
             android:orientation="horizontal"
             android:padding="16dp"
-            android:layout_weight="15"
+            android:layout_weight="10"
             >
 
             <Button
@@ -44,6 +44,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="@color/white"
                 android:drawableTop="@drawable/ic_nearme"
                 android:text="Near Me"
                 android:textColor="#000000" />
@@ -53,6 +54,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="@color/white"
                 android:drawableTop="@drawable/ic_explore"
                 android:text="Explore"
                 android:textColor="#000000" />
