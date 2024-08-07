@@ -74,7 +74,6 @@ class MainActivity : AppCompatActivity() {
                 if (locationResult.locations.isNotEmpty()) {
                     for (location in locationResult.locations) {
                         val latLng = LatLng.from(location.latitude, location.longitude)
-                        Log.d("LocationCallback", "Location updated: $latLng")
                         locationViewModel.updateLocation(latLng)
                     }
                 } else {
@@ -91,7 +90,6 @@ class MainActivity : AppCompatActivity() {
     private fun startLocationUpdates() {
         if (!requestingLocationUpdates) {
             requestingLocationUpdates = true
-            Log.d("LocationUpdates", "Starting location updates")
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
         }
     }
@@ -105,7 +103,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        Log.d("LocationUpdates", "Stopping location updates")
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
@@ -161,7 +158,6 @@ class MainActivity : AppCompatActivity() {
                 .addOnSuccessListener { location ->
                     location?.let {
                         val latLng = LatLng.from(it.latitude, it.longitude)
-                        Log.d("CurrentLocation", "Current location: $latLng")
                         locationViewModel.updateLocation(latLng)
                         startLocationUpdates() // 위치 권한이 부여된 후 위치 업데이트 시작
                     }
