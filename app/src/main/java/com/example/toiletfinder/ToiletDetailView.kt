@@ -1,23 +1,36 @@
 package com.example.toiletfinder
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
+import android.view.MenuItem
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
-class ToiletDetailView : AppCompatActivity() {
+class ToiletDtailActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_toilet_detail_view)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        val backButton: TextView = findViewById(R.id.backButton)
+
+        backButton.setOnClickListener {
+            finish()  // 현재 Activity 종료
         }
+    }
 
-        val toiletInfo = intent.getParcelableExtra<ToiletInfo>("toilet_info")
-
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                val intent = Intent().apply {
+                    // 원하는 코드 입력
+                }
+                setResult(RESULT_OK, intent)  // 원하는 코드 입력
+                finish()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 }
