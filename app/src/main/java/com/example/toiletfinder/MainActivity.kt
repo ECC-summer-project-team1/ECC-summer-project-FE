@@ -10,10 +10,16 @@ import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -22,6 +28,8 @@ import androidx.fragment.app.Fragment
 import com.google.android.gms.location.*
 import com.kakao.vectormap.KakaoMapSdk
 import com.kakao.vectormap.LatLng
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,6 +48,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var locationViewModel: LocationViewModel
 
+    private lateinit var searchEditText: EditText
+    private lateinit var searchButton: ImageButton
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         KakaoMapSdk.init(this, BuildConfig.KAKAO_MAP_KEY)
@@ -55,9 +66,34 @@ class MainActivity : AppCompatActivity() {
         locationViewModel = LocationViewModel() // 혹은 ViewModelProvider를 사용하여 초기화
 
         checkLocationPermissions()
+        // EditText와 ImageButton 초기화
+        searchEditText = findViewById(R.id.searchEditText)
+        searchButton = findViewById(R.id.btnSearch)
+
+        // ImageButton 클릭 이벤트 처리
+        searchButton.setOnClickListener {
+            if (searchEditText.visibility == View.GONE) {
+                searchEditText.visibility = View.VISIBLE
+            } else {
+                searchEditText.visibility = View.GONE
+            }
+        }
+
         setActive(ExploreFragment())
 
-        findViewById<Button>(R.id.button_nearme).setOnClickListener {
+        val buttonNearMe: Button = findViewById(R.id.button_nearme)
+        val buttonExplore: Button = findViewById(R.id.button_explore)
+        val btnRadius: Button = findViewById(R.id.btnRadius)
+        val radiusPopup: LinearLayout = findViewById(R.id.radiusPopup)
+        val resetRadius: Button = findViewById(R.id.resetRadius)
+        val applyRadius: Button = findViewById(R.id.applyRadius)
+        val radius100m: CheckBox = findViewById(R.id.radius100m)
+        val radius500m: CheckBox = findViewById(R.id.radius500m)
+        val radius1km: CheckBox = findViewById(R.id.radius1km)
+        val radius2km: CheckBox = findViewById(R.id.radius2km)
+        val radius3km: CheckBox = findViewById(R.id.radius3km)
+
+        buttonNearMe.setOnClickListener {
             setActive(NearMeFragment())
         }
 
@@ -84,6 +120,27 @@ class MainActivity : AppCompatActivity() {
             override fun onLocationAvailability(availability: LocationAvailability) {
                 Log.d("LocationCallback", "Location availability: ${availability.isLocationAvailable}")
             }
+        }
+
+        btnRadius.setOnClickListener {
+            if (radiusPopup.visibility == View.VISIBLE) {
+                radiusPopup.visibility = View.GONE
+            } else {
+                radiusPopup.visibility = View.VISIBLE
+            }
+        }
+
+        resetRadius.setOnClickListener {
+            radius100m.isChecked = false
+            radius500m.isChecked = false
+            radius1km.isChecked = false
+            radius2km.isChecked = false
+            radius3km.isChecked = false
+        }
+
+        applyRadius.setOnClickListener {
+            // 반경설정 로직 추가
+            radiusPopup.visibility = View.GONE
         }
     }
 
