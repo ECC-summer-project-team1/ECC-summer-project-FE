@@ -12,7 +12,7 @@ import com.kakao.vectormap.KakaoMapReadyCallback
 
 class ExploreFragment : Fragment() {
 
-    private lateinit var mapView: MapView
+   /* private lateinit var mapView: MapView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,5 +56,5 @@ class ExploreFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         // 필요한 경우 리소스 정리 및 MapView 관련 작업 수행
-    }
+    }*/
 }
