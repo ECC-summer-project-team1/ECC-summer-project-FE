@@ -7,25 +7,23 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    
     <LinearLayout
         android:id="@+id/mainScreenLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
+
         <!-- 상단바 -->
         <LinearLayout
             android:id="@+id/topBar"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:background="@android:color/white"
             android:elevation="4dp"
             android:padding="1dp"
             android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_alignParentStart="true">
+            android:layout_marginBottom="10dp">
 
             <Button
                 android:id="@+id/btnMap"
@@ -49,7 +47,6 @@
                 android:textColor="@color/black"
                 android:background="@drawable/button_background"
                 android:layout_marginStart="8dp" />
-
 
             <View
                 android:layout_width="0dp"
@@ -75,10 +72,8 @@
             <include
                 layout="@layout/activity_explore_fragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent" />
         </FrameLayout>
-
-
 
         <!-- 반경 설정 팝업(? 메뉴 -->
         <LinearLayout
@@ -89,9 +84,7 @@
             android:background="@drawable/popup_border"
             android:elevation="8dp"
             android:padding="16dp"
-            android:visibility="gone"
-            android:layout_below="@id/topBar"
-            android:layout_centerHorizontal="true">
+            android:visibility="gone">
 
             <!-- 100m 반경 체크박스 -->
             <CheckBox
@@ -136,8 +129,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="초기화"
-                    android:background="@color/lightBlue"/>
-
+                    android:background="@color/lightBlue" />
 
                 <Button
                     android:id="@+id/applyRadius"
@@ -145,7 +137,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="적용"
-                    android:background="@color/deepBlue"/>
+                    android:background="@color/deepBlue" />
             </LinearLayout>
 
             <!-- 서치 텍스트입력 박스 -->
@@ -157,8 +149,9 @@
                 android:visibility="gone"
                 android:padding="8dp"
                 android:layout_marginBottom="8dp" />
-
         </LinearLayout>
+
+        <!-- 하단 버튼 레이아웃 -->
         <LinearLayout
             android:id="@+id/buttons_layout"
             android:layout_width="match_parent"
@@ -167,8 +160,7 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:padding="16dp"
-            android:layout_weight="10"
-            >
+            android:layout_weight="10">
 
             <Button
                 android:id="@+id/button_nearme"
@@ -180,7 +172,6 @@
                 android:text="Near Me"
                 android:textColor="#000000" />
 
-
             <Button
                 android:id="@+id/button_explore"
                 android:layout_width="0dp"
@@ -189,8 +180,7 @@
                 android:background="@color/white"
                 android:drawableTop="@drawable/ic_explore"
                 android:text="Explore"
-                android:textColor="#000000"/>
+                android:textColor="#000000" />
         </LinearLayout>
-
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
