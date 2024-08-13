@@ -30,6 +30,9 @@ import com.kakao.vectormap.KakaoMapSdk
 import com.kakao.vectormap.LatLng
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import androidx.constraintlayout.widget.ConstraintLayout
+import android.view.MotionEvent
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -93,6 +96,19 @@ class MainActivity : AppCompatActivity() {
         val radius2km: CheckBox = findViewById(R.id.radius2km)
         val radius3km: CheckBox = findViewById(R.id.radius3km)
 
+        // 체크박스를 배열로 묶어서 관리
+        val checkBoxes = arrayOf(radius100m, radius500m, radius1km, radius2km, radius3km)
+
+        // 체크박스 선택 시 다른 체크박스 해제
+        for (checkBox in checkBoxes) {
+            checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked) {
+                    // 현재 선택된 체크박스를 제외한 나머지 체크박스를 모두 해제
+                    checkBoxes.forEach { if (it != buttonView) it.isChecked = false }
+                }
+            }
+        }
+
         buttonNearMe.setOnClickListener {
             setActive(NearMeFragment())
         }
@@ -131,16 +147,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         resetRadius.setOnClickListener {
-            radius100m.isChecked = false
-            radius500m.isChecked = false
-            radius1km.isChecked = false
-            radius2km.isChecked = false
-            radius3km.isChecked = false
+            checkBoxes.forEach { it.isChecked = false }
         }
 
         applyRadius.setOnClickListener {
             // 반경설정 로직 추가
             radiusPopup.visibility = View.GONE
+        }
+
+
+        // 팝업 창 밖의 터치 이벤트 처리
+        val mainLayout: ConstraintLayout = findViewById(R.id.main)
+        mainLayout.setOnTouchListener { _, event ->
+            if (radiusPopup.visibility == View.VISIBLE && event.action == MotionEvent.ACTION_DOWN) {
+                radiusPopup.visibility = View.GONE
+            }
+            true
         }
     }
 
