@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import java.io.Serializable
 
 class RVAdapterforNearme(private val items: MutableList<ToiletInfo>) : RecyclerView.Adapter<RVAdapterforNearme.ViewHolder>() {
 
@@ -28,13 +29,13 @@ class RVAdapterforNearme(private val items: MutableList<ToiletInfo>) : RecyclerV
         private val addressTextView: TextView = itemView.findViewById(R.id.toilet_address)
 
         fun bindItems(item: ToiletInfo) {
-            nameTextView.text = item.name
-            addressTextView.text = item.address
+            nameTextView.text = item.toiletName
+            addressTextView.text = item.addressRoad
 
             itemView.setOnClickListener {
                 val context = itemView.context
                 val intent = Intent(context, ToiletDetailView::class.java).apply {
-                    putExtra("toilet_info", item as Parcelable)
+                    putExtra("toilet_info", item as Serializable)
                 }
                 context.startActivity(intent)
             }
