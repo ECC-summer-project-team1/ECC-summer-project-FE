@@ -145,6 +145,8 @@
             android:id="@+id/searchEditText"
             android:layout_width="match_parent"
             android:layout_height="45dp"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
             android:hint="> 화장실검색"
             android:visibility="gone"
             android:padding="8dp"
