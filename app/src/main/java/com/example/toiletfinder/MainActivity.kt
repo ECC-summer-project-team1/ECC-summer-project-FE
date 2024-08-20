@@ -11,6 +11,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -73,7 +74,6 @@ class MainActivity : AppCompatActivity() {
         //SharedPreferences 초기화
         sharedPreferences = getSharedPreferences("RadiusPreferences", MODE_PRIVATE)
 
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -83,22 +83,36 @@ class MainActivity : AppCompatActivity() {
         // ViewModel 초기화 (필요에 따라 초기화 방식 변경)
         locationViewModel = LocationViewModel() // 혹은 ViewModelProvider를 사용하여 초기화
 
+        // 위치 권한 확인
         checkLocationPermissions()
+
         // EditText와 ImageButton 초기화
         searchEditText = findViewById(R.id.searchEditText)
         searchButton = findViewById(R.id.btnSearch)
 
-        // ImageButton 클릭 이벤트 처리
+        // 검색 버튼 클릭 이벤트 처리
         searchButton.setOnClickListener {
             if (searchEditText.visibility == View.GONE) {
                 searchEditText.visibility = View.VISIBLE
             } else {
-                searchEditText.visibility = View.GONE
+                executeSearch()
+            }
+        }
+        // Enter 키로 검색 실행
+        searchEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                executeSearch()
+                true  // 줄바꿈을 막고, 검색 동작을 실행
+            } else {
+                false
             }
         }
 
+
+        // 초기 Fragment 설정
         setActive(ExploreFragment())
 
+        // 버튼 및 반경 설정 관련 UI 초기화 및 설정
         val buttonNearMe: Button = findViewById(R.id.button_nearme)
         val buttonExplore: Button = findViewById(R.id.button_explore)
         val btnRadius: Button = findViewById(R.id.btnRadius)
@@ -111,7 +125,7 @@ class MainActivity : AppCompatActivity() {
         val radius2km: CheckBox = findViewById(R.id.radius2km)
         val radius3km: CheckBox = findViewById(R.id.radius3km)
 
-        // 체크박스를 배열로 묶어서 관리
+        // 체크박스 배열로 관리
         val checkBoxes = arrayOf(radius100m, radius500m, radius1km, radius2km, radius3km)
 
         // 체크박스 선택 시 다른 체크박스 해제
@@ -124,14 +138,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // "Near Me" 버튼 클릭 이벤트 설정
         buttonNearMe.setOnClickListener {
             setActive(NearMeFragment())
         }
 
-        findViewById<Button>(R.id.button_explore).setOnClickListener {
+        // "Explore" 버튼 클릭 이벤트 설정
+        buttonExplore.setOnClickListener {
             setActive(ExploreFragment())
         }
 
+        // 위치 요청 및 콜백 설정
         locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 2000L)
             .setMinUpdateIntervalMillis(2000L)
             .build()
@@ -153,6 +170,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // 반경 설정 버튼 클릭 이벤트 설정
         btnRadius.setOnClickListener {
             if (radiusPopup.visibility == View.VISIBLE) {
                 radiusPopup.visibility = View.GONE
@@ -161,17 +179,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // 반경 초기화 버튼 클릭 이벤트 설정
         resetRadius.setOnClickListener {
             checkBoxes.forEach { it.isChecked = false }
         }
 
+        // 반경 적용 버튼 클릭 이벤트 설정
         applyRadius.setOnClickListener {
-            saveRadiusSelection(checkBoxes) // 주석: 반경 저장 함수 호출
-            sendRadiusToBackend() // 주석: 서버로 전송 함수 호출
-            // 반경설정 로직 추가
-            radiusPopup.visibility = View.GONE
+            saveRadiusSelection(checkBoxes) // 반경 저장 함수 호출
+            sendRadiusToBackend() // 서버로 전송 함수 호출
+            radiusPopup.visibility = View.GONE // 팝업 숨기기
         }
-
 
         // 팝업 창 밖의 터치 이벤트 처리
         val mainLayout: ConstraintLayout = findViewById(R.id.main)
@@ -183,7 +201,68 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 주석: 사용자가 선택한 반경을 SharedPreferences에 저장하는 함수
+    // 검색어를 백엔드로 전송
+    private fun executeSearch() {
+        val query = searchEditText.text.toString().trim()
+        if (query.isNotEmpty()) {
+            saveSearchQuery(query)  // 검색어 저장
+            sendSearchQueryToBackend(query)
+
+            // 검색어 저장 이후 EditText 초기화 및 숨기기
+            searchEditText.setText("")
+            searchEditText.visibility = View.GONE
+        } else {
+            Toast.makeText(this, "검색어를 입력하세요.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // 검색어를 SharedPreferences에 저장
+    private fun saveSearchQuery(query: String) {
+        val editor = sharedPreferences.edit()
+        editor.putString("lastSearchQuery", query)
+        editor.apply()
+
+        // 저장된 검색어 값을 로그로 출력
+        Log.d("MainActivity", "Search query saved: $query")
+    }
+
+    // 검색어를 백엔드로 전송하는 함수
+    private fun sendSearchQueryToBackend(query: String) {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://your-backend-url.com") // 실제 백엔드 URL로 변경필요ㅇ
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val apiService = retrofit.create(ApiService::class.java)
+        val call = apiService.search(query)
+
+        call.enqueue(object : Callback<SearchResponse> {
+            override fun onResponse(call: Call<SearchResponse>, response: Response<SearchResponse>) {
+                if (response.isSuccessful) {
+                    val searchResults = response.body()?.results ?: emptyList()
+                    displaySearchResults(searchResults)
+                } else {
+                    Toast.makeText(this@MainActivity, "검색에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "네트워크 오류 발생", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    // 검색 결과를 UI에 표시하는 함수
+    private fun displaySearchResults(results: List<SearchResult>) {
+        if (results.isNotEmpty()) {
+            Toast.makeText(this, "첫 번째 결과: ${results[0].title}", Toast.LENGTH_LONG).show()
+            // RecyclerView 등을 사용하여 결과를 표시하세요.
+        } else {
+            Toast.makeText(this, "검색 결과가 없습니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // 사용자가 선택한 반경을 SharedPreferences에 저장하는 함수
     private fun saveRadiusSelection(checkBoxes: Array<CheckBox>) {
         val editor = sharedPreferences.edit()
         for (checkBox in checkBoxes) {
@@ -199,11 +278,11 @@ class MainActivity : AppCompatActivity() {
         editor.apply()
     }
 
-    // 주석: 저장된 반경을 서버로 전송하는 함수
+    // 저장된 반경을 서버로 전송하는 함수
     private fun sendRadiusToBackend() {
         val selectedRadius = sharedPreferences.getString("selectedRadius", "100m")
 
-        // 주석: Retrofit을 사용하여 서버로 데이터를 전송
+        // Retrofit을 사용하여 서버로 데이터를 전송
         val retrofit = Retrofit.Builder()
             .baseUrl("https://your-backend-url.com") // 실제 백엔드 URL로 변경하세요
             .addConverterFactory(GsonConverterFactory.create())
@@ -314,9 +393,12 @@ class MainActivity : AppCompatActivity() {
             .commit()
     }
 
-    //Retrofit API 인터페이스 정의
+    // Retrofit API 인터페이스 정의
     interface ApiService {
         @POST("/api/sendRadiusData")
         fun sendRadiusData(@Body radius: String): Call<ResponseBody>
+
+        @POST("/api/search")
+        fun search(@Body query: String): Call<SearchResponse>
     }
 }
