@@ -1,5 +1,6 @@
 package com.example.toiletfinder
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,6 +11,6 @@ class LocationViewModel : ViewModel() {
     val location: LiveData<LatLng> get() = _location
 
     fun updateLocation(latLng: LatLng) {
-        _location.value = latLng
+        _location.postValue(latLng)
     }
 }

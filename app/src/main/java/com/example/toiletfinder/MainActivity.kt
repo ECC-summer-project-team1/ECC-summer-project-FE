@@ -34,6 +34,7 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.constraintlayout.widget.ConstraintLayout
 import android.view.MotionEvent
 import android.content.SharedPreferences
+import androidx.lifecycle.ViewModelProvider
 import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
 import okhttp3.ResponseBody
@@ -81,7 +82,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // ViewModel 초기화 (필요에 따라 초기화 방식 변경)
-        locationViewModel = LocationViewModel() // 혹은 ViewModelProvider를 사용하여 초기화
+        locationViewModel = ViewModelProvider(this).get(LocationViewModel::class.java)
 
         // 위치 권한 확인
         checkLocationPermissions()
