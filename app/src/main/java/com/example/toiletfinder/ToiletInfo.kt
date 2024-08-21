@@ -10,4 +10,6 @@ data class ToiletInfo(
     val phoneNumber: String,
     val managingInstitution : String,
     val openingHours: String,
+    val latitude: Double,
+    val longitude: Double
 ) : Serializable
