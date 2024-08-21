@@ -67,13 +67,24 @@ class MainActivity : AppCompatActivity() {
     private lateinit var searchEditText: EditText
     private lateinit var searchButton: ImageButton
 
+    private lateinit var backendManager: BackendManager
+    private lateinit var viewModel: LocationViewModel
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         KakaoMapSdk.init(this, BuildConfig.KAKAO_MAP_KEY)
         setContentView(R.layout.activity_main)
 
+        setContentView(R.layout.activity_main)
+
+        viewModel = ViewModelProvider(this).get(LocationViewModel::class.java)
+        backendManager = BackendManager(this, viewModel)
+
         //SharedPreferences 초기화
         sharedPreferences = getSharedPreferences("RadiusPreferences", MODE_PRIVATE)
+
+        val fileUri: Uri = Uri.parse("file://path_to_your_file/yourfile.xlsx") // TODO: 실제 파일 경로로 수정
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -128,6 +139,7 @@ class MainActivity : AppCompatActivity() {
 
         // 체크박스 배열로 관리
         val checkBoxes = arrayOf(radius100m, radius500m, radius1km, radius2km, radius3km)
+        radius100m.isChecked = true //기본값으로 설정
 
         // 체크박스 선택 시 다른 체크박스 해제
         for (checkBox in checkBoxes) {
@@ -137,6 +149,12 @@ class MainActivity : AppCompatActivity() {
                     checkBoxes.forEach { if (it != buttonView) it.isChecked = false }
                 }
             }
+        }
+
+        //시작하자마자 기본적으로 전송함.
+        val selectedRadius = saveRadiusSelection(checkBoxes)
+        if (selectedRadius != null) {
+            backendManager.startSendingRadiusData(fileUri, selectedRadius)
         }
 
         // "Near Me" 버튼 클릭 이벤트 설정
@@ -187,11 +205,15 @@ class MainActivity : AppCompatActivity() {
 
         // 반경 적용 버튼 클릭 이벤트 설정
         applyRadius.setOnClickListener {
-            saveRadiusSelection(checkBoxes) // 반경 저장 함수 호출
-            sendRadiusToBackend() // 서버로 전송 함수 호출
-            radiusPopup.visibility = View.GONE // 팝업 숨기기
+            val selectedRadius = saveRadiusSelection(checkBoxes)
+            if (selectedRadius != null) {
+                backendManager.stopSendingRadiusData()  // 이전 작업 중지
+                backendManager.startSendingRadiusData(fileUri, selectedRadius)
+            } else {
+                Toast.makeText(this, "반경을 선택해주세요", Toast.LENGTH_SHORT).show()
+            }
+            radiusPopup.visibility = View.GONE
         }
-
         // 팝업 창 밖의 터치 이벤트 처리
         val mainLayout: ConstraintLayout = findViewById(R.id.main)
         mainLayout.setOnTouchListener { _, event ->
@@ -263,49 +285,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 사용자가 선택한 반경을 SharedPreferences에 저장하는 함수
-    private fun saveRadiusSelection(checkBoxes: Array<CheckBox>) {
+    // 주석: 사용자가 선택한 반경을 SharedPreferences에 저장하는 함수
+    private fun saveRadiusSelection(checkBoxes: Array<CheckBox>): String? {
+        var selectedRadius: String? = null
         val editor = sharedPreferences.edit()
         for (checkBox in checkBoxes) {
             if (checkBox.isChecked) {
-                val selectedRadius = checkBox.text.toString()
+                selectedRadius = checkBox.text.toString()
                 editor.putString("selectedRadius", selectedRadius)
                 editor.apply()
-                // 저장된 반경 값을 로그로 출력
                 Log.d("MainActivity", "Selected radius saved: $selectedRadius")
                 break
             }
         }
-        editor.apply()
+        return selectedRadius
     }
 
-    // 저장된 반경을 서버로 전송하는 함수
-    private fun sendRadiusToBackend() {
-        val selectedRadius = sharedPreferences.getString("selectedRadius", "100m")
-
-        // Retrofit을 사용하여 서버로 데이터를 전송
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://your-backend-url.com") // 실제 백엔드 URL로 변경하세요
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val apiService = retrofit.create(ApiService::class.java)
-        val call = apiService.sendRadiusData(selectedRadius ?: "100m")
-
-        call.enqueue(object : Callback<ResponseBody> {
-            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                if (response.isSuccessful) {
-                    Toast.makeText(this@MainActivity, "Radius data sent successfully!", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this@MainActivity, "Failed to send radius data", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                Toast.makeText(this@MainActivity, "Network error occurred", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
 
     private fun startLocationUpdates() {
         if (!requestingLocationUpdates) {
@@ -319,6 +314,11 @@ class MainActivity : AppCompatActivity() {
         if (requestingLocationUpdates) {
             startLocationUpdates()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        backendManager.stopSendingRadiusData() // 액티비티 종료 시 데이터 전송 중지
     }
 
     override fun onPause() {
@@ -394,12 +394,4 @@ class MainActivity : AppCompatActivity() {
             .commit()
     }
 
-    // Retrofit API 인터페이스 정의
-    interface ApiService {
-        @POST("/api/sendRadiusData")
-        fun sendRadiusData(@Body radius: String): Call<ResponseBody>
-
-        @POST("/api/search")
-        fun search(@Body query: String): Call<SearchResponse>
-    }
 }
