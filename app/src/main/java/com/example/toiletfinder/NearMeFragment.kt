@@ -1,6 +1,7 @@
 package com.example.toiletfinder
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,16 +27,21 @@ class NearMeFragment : Fragment() {
         val recyclerView: RecyclerView = view.findViewById(R.id.rv_nearme)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        // 예시 데이터를 설정합니다.
-        val toiletInfoList = mutableListOf(
-            ToiletInfo("1", "9:00", "21:00", "화장실 1", "서울특별시 ...", 37.57, 126.94),
-            ToiletInfo("2", "10:00", "18:00" , "화장실 2", "서울특별시 ...", 37.531, 122.345)
-            // 추가 데이터
-        )
 
         // 어댑터를 설정합니다.
-        val adapter = RVAdapterforNearme(toiletInfoList, locationViewModel)
+        val adapter = RVAdapterforNearme(mutableListOf(), locationViewModel)
         recyclerView.adapter = adapter
+
+        locationViewModel.toiletList.observe(viewLifecycleOwner) { toilets ->
+            Log.d("NearMeFragment", "Toilet list updated with ${toilets.size} items")
+
+            (recyclerView.adapter as RVAdapterforNearme).apply {
+                items.clear()
+                items.addAll(toilets)
+                notifyDataSetChanged()
+            }
+        }
+
 
         return view;
     }

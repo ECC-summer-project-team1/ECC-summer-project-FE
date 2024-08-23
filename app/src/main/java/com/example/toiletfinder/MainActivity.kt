@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         //시작하자마자 기본적으로 전송함.
         val selectedRadius = saveRadiusSelection(checkBoxes)
         if (selectedRadius != null) {
-            backendManager.startSendingRadiusData(fileUri, selectedRadius)
+            backendManager.startSendingCurrentInfo(fileUri, selectedRadius)
         }
 
         // "Near Me" 버튼 클릭 이벤트 설정
@@ -200,8 +200,8 @@ class MainActivity : AppCompatActivity() {
         applyRadius.setOnClickListener {
             val selectedRadius = saveRadiusSelection(checkBoxes)
             if (selectedRadius != null) {
-                backendManager.stopSendingRadiusData()  // 이전 작업 중지
-                backendManager.startSendingRadiusData(fileUri, selectedRadius)
+                backendManager.stopSendingCurrentInfo()  // 이전 작업 중지
+                backendManager.startSendingCurrentInfo(fileUri, selectedRadius)
             } else {
                 Toast.makeText(this, "반경을 선택해주세요", Toast.LENGTH_SHORT).show()
             }
@@ -311,7 +311,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        backendManager.stopSendingRadiusData() // 액티비티 종료 시 데이터 전송 중지
+        backendManager.stopSendingCurrentInfo() // 액티비티 종료 시 데이터 전송 중지
     }
 
     override fun onPause() {

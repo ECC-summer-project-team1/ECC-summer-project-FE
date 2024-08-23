@@ -21,7 +21,7 @@ import java.io.Serializable
 
 
 class RVAdapterforNearme(
-    private val items: MutableList<ToiletInfo>,
+    val items: MutableList<ToiletInfo>,
     private val locationViewModel: LocationViewModel
 ) : RecyclerView.Adapter<RVAdapterforNearme.ViewHolder>() {
 

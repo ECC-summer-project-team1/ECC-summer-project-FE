@@ -9,8 +9,13 @@ import com.kakao.vectormap.LatLng
 class LocationViewModel : ViewModel() {
     private val _location = MutableLiveData<LatLng>()
     val location: LiveData<LatLng> get() = _location
+    val toiletList: MutableLiveData<List<ToiletInfo>> = MutableLiveData()
 
     fun updateLocation(latLng: LatLng) {
         _location.postValue(latLng)
+    }
+
+    fun updateToiletList(toilets: List<ToiletInfo>) {
+        toiletList.postValue(toilets)
     }
 }
