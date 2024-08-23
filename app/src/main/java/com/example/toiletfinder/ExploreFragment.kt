@@ -5,8 +5,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.kakao.vectormap.GestureType
 import com.kakao.vectormap.MapLifeCycleCallback
 import com.kakao.vectormap.MapView
 import com.kakao.vectormap.KakaoMap
@@ -26,6 +28,9 @@ class ExploreFragment : Fragment() {
     private lateinit var locationViewModel: LocationViewModel
     private var kakaoMap: KakaoMap? = null
     private var locationLabel: Label? = null
+
+    private var isTracking = true  // 현재 트래킹 중인지 여부를 나타내는 플래그
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -98,22 +103,39 @@ class ExploreFragment : Fragment() {
                         }
                     }
                 }
+
+                kakaoMap?.setOnCameraMoveStartListener { map, gestureType ->
+                    Log.d("ExploreFragment", "Camera move started. GestureType: $gestureType")
+                    if (gestureType == GestureType.Pan) {
+                        isTracking = false
+                    }
+                }
             }
         })
 
         // ViewModel의 location 값이 변경될 때마다 라벨 위치 업데이트
         locationViewModel.location.observe(viewLifecycleOwner) { latLng ->
             if (latLng != null) {
-                Log.d("ExploreFragment", "Location updated: Latitude = ${latLng.latitude}, Longitude = ${latLng.longitude}")
-
                 // 지도의 카메라를 새로운 위치로 이동
                 val newPosition = LatLng.from(latLng.latitude, latLng.longitude)
-                kakaoMap?.moveCamera(CameraUpdateFactory.newCenterPosition(newPosition))
-
+                if (isTracking) {
+                    kakaoMap?.moveCamera(CameraUpdateFactory.newCenterPosition(newPosition))
+                }
                 // 라벨의 위치를 새 위치로 이동
                 locationLabel?.moveTo(newPosition)
             } else {
                 Log.d("ExploreFragment", "Location is currently null")
+            }
+        }
+
+        view.findViewById<ImageButton>(R.id.reset_button).setOnClickListener {
+            // 새로운 위치로 카메라 트래킹 시작
+            locationViewModel.location.value?.let { latLng ->
+                val newPosition = LatLng.from(latLng.latitude, latLng.longitude)
+                kakaoMap?.moveCamera(CameraUpdateFactory.newCenterPosition(newPosition))
+                // 라벨의 위치를 새 위치로 이동
+                locationLabel?.moveTo(newPosition)
+                isTracking = true  // 버튼 클릭 시 트래킹 상태를 활성화
             }
         }
     }
