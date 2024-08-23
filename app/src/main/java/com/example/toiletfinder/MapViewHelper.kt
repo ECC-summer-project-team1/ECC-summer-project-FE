@@ -50,5 +50,7 @@ object MapViewHelper {
                 )
             }
         })
+
     }
+
 }

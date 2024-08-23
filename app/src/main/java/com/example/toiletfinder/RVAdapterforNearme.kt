@@ -20,7 +20,10 @@ import com.kakao.vectormap.label.TransformMethod
 import java.io.Serializable
 
 
-class RVAdapterforNearme(private val items: MutableList<ToiletInfo>) : RecyclerView.Adapter<RVAdapterforNearme.ViewHolder>() {
+class RVAdapterforNearme(
+    private val items: MutableList<ToiletInfo>,
+    private val locationViewModel: LocationViewModel
+) : RecyclerView.Adapter<RVAdapterforNearme.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.rv_nearme_toilet, parent, false)
@@ -52,8 +55,12 @@ class RVAdapterforNearme(private val items: MutableList<ToiletInfo>) : RecyclerV
 
             itemView.setOnClickListener {
                 val context = itemView.context
+                val currentLocation = locationViewModel.location.value
+
                 val intent = Intent(context, ToiletDetailView::class.java).apply {
                     putExtra("toilet_info", item as Serializable)
+                    putExtra("current_latitude", currentLocation?.latitude)
+                    putExtra("current_longitude", currentLocation?.longitude)
                 }
                 context.startActivity(intent)
             }
