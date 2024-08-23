@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         //시작하자마자 기본적으로 전송함.
         val selectedRadius = saveRadiusSelection(checkBoxes)
         if (selectedRadius != null) {
-            backendManager.startSendingCurrentInfo(fileUri, selectedRadius)
+            backendManager.sendCurrentInfoOnce(fileUri, selectedRadius)
         }
 
         // "Near Me" 버튼 클릭 이벤트 설정
@@ -162,7 +162,8 @@ class MainActivity : AppCompatActivity() {
 
         // 위치 요청 및 콜백 설정
         locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 2000L)
-            .setMinUpdateIntervalMillis(2000L)
+            .setMinUpdateIntervalMillis(2000L) // 위치 업데이트 간격을 2초로 설정
+            .setMaxUpdateDelayMillis(2000L) // 최대 업데이트 지연 시간도 2초로 설정
             .build()
 
         locationCallback = object : LocationCallback() {
@@ -200,8 +201,7 @@ class MainActivity : AppCompatActivity() {
         applyRadius.setOnClickListener {
             val selectedRadius = saveRadiusSelection(checkBoxes)
             if (selectedRadius != null) {
-                backendManager.stopSendingCurrentInfo()  // 이전 작업 중지
-                backendManager.startSendingCurrentInfo(fileUri, selectedRadius)
+                backendManager.sendCurrentInfoOnce(fileUri, selectedRadius)
             } else {
                 Toast.makeText(this, "반경을 선택해주세요", Toast.LENGTH_SHORT).show()
             }
@@ -311,7 +311,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        backendManager.stopSendingCurrentInfo() // 액티비티 종료 시 데이터 전송 중지
     }
 
     override fun onPause() {

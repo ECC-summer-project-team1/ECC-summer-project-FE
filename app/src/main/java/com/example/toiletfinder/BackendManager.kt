@@ -28,24 +28,16 @@ class BackendManager(
 
     private val apiService: ApiService = retrofit.create(ApiService::class.java)
 
-    private var job: Job? = null
-
-    fun startSendingCurrentInfo(fileUri: Uri, radius: String) {
-        job = CoroutineScope(Dispatchers.IO).launch {
-            while (isActive) {
-                val latLng = viewModel.location.value
-                if (latLng != null) {
-                    sendCurrrentInfo(fileUri, latLng, radius)
-                }
-                delay(10000) // 10초마다 전송
-                receiveDummyData()
+    fun sendCurrentInfoOnce(fileUri: Uri, radius: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val latLng = viewModel.location.value
+            if (latLng != null) {
+                sendCurrrentInfo(fileUri, latLng, radius)
             }
+            receiveDummyData() // 더미 데이터도 호출
         }
     }
 
-    fun stopSendingCurrentInfo() {
-        job?.cancel()
-    }
     // 더미 데이터를 생성하고 ViewModel에 저장하는 함수입니다.
     private suspend fun receiveDummyData() {
         Log.d("BackendManager", "Generating dummy data")
@@ -124,7 +116,7 @@ class BackendManager(
             }
         })
     }
-    
+
     //정보를 받아오는 중
     fun fetchToiletData(latitude: Double, longitude: Double, radius: String) {
         val call = apiService.getToilets(latitude, longitude, radius)
