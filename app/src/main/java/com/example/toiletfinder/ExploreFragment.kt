@@ -78,6 +78,25 @@ class ExploreFragment : Fragment() {
                             .setTransform(TransformMethod.AbsoluteRotation_Decal)
                     )
 
+                    //toilet 위치
+                    locationViewModel.toiletList.observe(viewLifecycleOwner) { toilets ->
+                        toilets.forEach { toilet ->
+                            val toiletPosition = LatLng.from(toilet.latitude, toilet.longitude)
+
+                            // 각 화장실 위치에 라벨을 추가합니다.
+                            labelLayer?.addLabel(
+                                LabelOptions.from(toiletPosition)
+                                    .setRank(10)
+                                    .setStyles(
+                                        LabelStyles.from(
+                                            LabelStyle.from(R.drawable.map_pin) // 화장실 라벨 아이콘을 사용하세요.
+                                                .setAnchorPoint(0.5f, 0.5f)
+                                        )
+                                    )
+                                    .setTransform(TransformMethod.AbsoluteRotation_Decal)
+                            )
+                        }
+                    }
                 }
             }
         })
