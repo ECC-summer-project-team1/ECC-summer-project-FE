@@ -5,11 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 
 class NearMeFragment : Fragment() {
+
+    private lateinit var locationViewModel: LocationViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -17,6 +20,7 @@ class NearMeFragment : Fragment() {
     ): View? {
         // 프래그먼트 레이아웃을 인플레이트합니다.
         val view = inflater.inflate(R.layout.activity_near_me_fragment, container, false)
+        locationViewModel = ViewModelProvider(requireActivity()).get(LocationViewModel::class.java)
 
         // RecyclerView 설정
         val recyclerView: RecyclerView = view.findViewById(R.id.rv_nearme)
@@ -24,13 +28,13 @@ class NearMeFragment : Fragment() {
 
         // 예시 데이터를 설정합니다.
         val toiletInfoList = mutableListOf(
-            ToiletInfo("1", "9:00", "21:00", "화장실 1", "서울특별시 ..."),
-            ToiletInfo("2", "10:00", "18:00" , "화장실 2", "서울특별시 ...")
+            ToiletInfo("1", "9:00", "21:00", "화장실 1", "서울특별시 ...", 37.57, 126.94),
+            ToiletInfo("2", "10:00", "18:00" , "화장실 2", "서울특별시 ...", 37.531, 122.345)
             // 추가 데이터
         )
 
         // 어댑터를 설정합니다.
-        val adapter = RVAdapterforNearme(toiletInfoList)
+        val adapter = RVAdapterforNearme(toiletInfoList, locationViewModel)
         recyclerView.adapter = adapter
 
         return view;

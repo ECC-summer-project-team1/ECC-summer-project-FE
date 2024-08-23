@@ -68,18 +68,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var searchButton: ImageButton
 
     private lateinit var backendManager: BackendManager
-    private lateinit var viewModel: LocationViewModel
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         KakaoMapSdk.init(this, BuildConfig.KAKAO_MAP_KEY)
         setContentView(R.layout.activity_main)
 
-        setContentView(R.layout.activity_main)
-
-        viewModel = ViewModelProvider(this).get(LocationViewModel::class.java)
-        backendManager = BackendManager(this, viewModel)
+        locationViewModel  = ViewModelProvider(this).get(LocationViewModel::class.java)
+        backendManager = BackendManager(this, locationViewModel )
 
         //SharedPreferences 초기화
         sharedPreferences = getSharedPreferences("RadiusPreferences", MODE_PRIVATE)
@@ -91,9 +87,6 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        // ViewModel 초기화 (필요에 따라 초기화 방식 변경)
-        locationViewModel = ViewModelProvider(this).get(LocationViewModel::class.java)
 
         // 위치 권한 확인
         checkLocationPermissions()
