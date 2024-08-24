@@ -11,11 +11,22 @@ class LocationViewModel : ViewModel() {
     val location: LiveData<LatLng> get() = _location
     val toiletList: MutableLiveData<List<ToiletInfo>> = MutableLiveData()
 
+    private val _moveCameraToFirstToilet = MutableLiveData<Boolean>()
+    val moveCameraToFirstToilet: LiveData<Boolean> get() = _moveCameraToFirstToilet
+
     fun updateLocation(latLng: LatLng) {
         _location.postValue(latLng)
     }
 
     fun updateToiletList(toilets: List<ToiletInfo>) {
         toiletList.postValue(toilets)
+    }
+
+    fun requestMoveCameraToFirstToilet() {
+        _moveCameraToFirstToilet.postValue(true)
+    }
+
+    fun cameraMoved() {
+        _moveCameraToFirstToilet.postValue(false)
     }
 }

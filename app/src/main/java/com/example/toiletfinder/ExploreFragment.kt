@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.kakao.vectormap.GestureType
@@ -109,7 +110,15 @@ class ExploreFragment : Fragment() {
                             label?.tag = toilet // 또는 다른 방식으로 화장실 정보를 저장할 수 있습니다.
                         }
                     }
+
+                    locationViewModel.moveCameraToFirstToilet.observe(viewLifecycleOwner) { shouldMove ->
+                        if (shouldMove) {
+                            moveCameraToFirstToilet()
+                            locationViewModel.cameraMoved() // 요청 후 상태 리셋
+                        }
+                    }
                 }
+
 
                 kakaoMap?.setOnCameraMoveStartListener { map, gestureType ->
                     Log.d("ExploreFragment", "Camera move started. GestureType: $gestureType")
@@ -176,8 +185,16 @@ class ExploreFragment : Fragment() {
                 backendManager.sendCameraInfoOnce(latLng, "500")
             }
         }
+
     }
 
+
+    private fun moveCameraToFirstToilet() {
+        locationViewModel.toiletList.value?.firstOrNull()?.let { firstToilet ->
+            val toiletPosition = LatLng.from(firstToilet.latitude, firstToilet.longitude)
+            kakaoMap?.moveCamera(CameraUpdateFactory.newCenterPosition(toiletPosition))
+        }
+    }
 
     override fun onResume() {
         super.onResume()
