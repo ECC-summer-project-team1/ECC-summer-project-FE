@@ -29,41 +29,40 @@
             app:layout_constraintEnd_toEndOf="parent">
 
             <Button
-                android:id="@+id/btnMap"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minWidth="36dp"
-                android:minHeight="28dp"
-                android:padding="4dp"
-                android:text="지도"
-                android:textColor="@color/black"
-                android:background="@drawable/button_background" />
-
-            <Button
                 android:id="@+id/btnRadius"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minWidth="60dp"
                 android:minHeight="28dp"
-                android:padding="4dp"
+                android:padding="8dp"
                 android:text="반경 설정"
                 android:textColor="@color/black"
                 android:background="@drawable/button_background"
-                android:layout_marginStart="8dp" />
-
-            <View
+                android:layout_marginEnd="8dp" />
+            <!-- 서치 텍스트입력 박스 -->
+            <EditText
+                android:id="@+id/searchEditText"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/edittext_border"
+                android:hint="> 화장실검색"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:padding="8dp"
+                android:visibility="visible" />
+
 
             <ImageButton
                 android:id="@+id/btnSearch"
                 android:layout_width="48dp"
                 android:layout_height="32dp"
+                android:background="@color/white"
+                android:contentDescription="검색"
                 android:padding="4dp"
-                android:src="@drawable/search"
                 android:scaleType="fitCenter"
-                android:contentDescription="검색" />
+                android:src="@drawable/search" />
         </LinearLayout>
 
         <!-- 반경 설정 팝업 -->
@@ -140,18 +139,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 서치 텍스트입력 박스 -->
-        <EditText
-            android:id="@+id/searchEditText"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:imeOptions="actionSearch"
-            android:inputType="text"
-            android:hint="> 화장실검색"
-            android:visibility="gone"
-            android:padding="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/edittext_border"/>
 
 
 

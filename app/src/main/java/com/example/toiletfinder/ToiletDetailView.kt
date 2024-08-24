@@ -59,7 +59,7 @@ class ToiletDetailView : AppCompatActivity() {
             textViewRestroom.text = toiletInfo.toiletName
             textViewHours.text = "운영시간: ${toiletInfo.openingHours}"
             textViewAddress.text = "주소: ${toiletInfo.addressRoad}"
-            textViewPhoneNumber.text = "전화번호: ${toiletInfo.phoneNumber}"
+            textViewPhoneNumber.text = "전화번호: ${toiletInfo.managingPhoneNumber}"
             textViewManagingInstitution.text = "관리 기관: ${toiletInfo.managingInstitution}"
         }
 

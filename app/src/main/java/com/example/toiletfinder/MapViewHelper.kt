@@ -1,5 +1,6 @@
 package com.example.toiletfinder
 
+import com.kakao.vectormap.GestureType
 import com.kakao.vectormap.camera.CameraUpdateFactory
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
@@ -33,6 +34,15 @@ object MapViewHelper {
                 onMapReady(map)
                 val position = LatLng.from(latitude, longitude)
                 map.moveCamera(CameraUpdateFactory.newCenterPosition(position))
+
+                map!!.setGestureEnable(GestureType.OneFingerDoubleTap, false)
+                map!!.setGestureEnable(GestureType.TwoFingerSingleTap, false)
+                map!!.setGestureEnable(GestureType.Zoom, false)
+                map!!.setGestureEnable(GestureType.OneFingerZoom, false)
+                map!!.setGestureEnable(GestureType.Pan, false)
+                map!!.setGestureEnable(GestureType.Tilt, false)
+                map!!.setGestureEnable(GestureType.Rotate, false)
+
 
                 val labelLayer = map.getLabelManager()?.layer
 

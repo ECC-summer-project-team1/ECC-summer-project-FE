@@ -69,6 +69,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var backendManager: BackendManager
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         KakaoMapSdk.init(this, BuildConfig.KAKAO_MAP_KEY)
@@ -97,11 +98,7 @@ class MainActivity : AppCompatActivity() {
 
         // 검색 버튼 클릭 이벤트 처리
         searchButton.setOnClickListener {
-            if (searchEditText.visibility == View.GONE) {
-                searchEditText.visibility = View.VISIBLE
-            } else {
                 executeSearch()
-            }
         }
         // Enter 키로 검색 실행
         searchEditText.setOnEditorActionListener { _, actionId, _ ->
@@ -147,7 +144,7 @@ class MainActivity : AppCompatActivity() {
         //시작하자마자 기본적으로 전송함.
         val selectedRadius = saveRadiusSelection(checkBoxes)
         if (selectedRadius != null) {
-            backendManager.startSendingRadiusData(fileUri, selectedRadius)
+            backendManager.sendCurrentInfoOnce(selectedRadius)
         }
 
         // "Near Me" 버튼 클릭 이벤트 설정
@@ -162,7 +159,8 @@ class MainActivity : AppCompatActivity() {
 
         // 위치 요청 및 콜백 설정
         locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 2000L)
-            .setMinUpdateIntervalMillis(2000L)
+            .setMinUpdateIntervalMillis(2000L) // 위치 업데이트 간격을 2초로 설정
+            .setMaxUpdateDelayMillis(2000L) // 최대 업데이트 지연 시간도 2초로 설정
             .build()
 
         locationCallback = object : LocationCallback() {
@@ -200,8 +198,7 @@ class MainActivity : AppCompatActivity() {
         applyRadius.setOnClickListener {
             val selectedRadius = saveRadiusSelection(checkBoxes)
             if (selectedRadius != null) {
-                backendManager.stopSendingRadiusData()  // 이전 작업 중지
-                backendManager.startSendingRadiusData(fileUri, selectedRadius)
+                backendManager.sendCurrentInfoOnce(selectedRadius)
             } else {
                 Toast.makeText(this, "반경을 선택해주세요", Toast.LENGTH_SHORT).show()
             }
@@ -221,62 +218,16 @@ class MainActivity : AppCompatActivity() {
     private fun executeSearch() {
         val query = searchEditText.text.toString().trim()
         if (query.isNotEmpty()) {
-            saveSearchQuery(query)  // 검색어 저장
-            sendSearchQueryToBackend(query)
-
+            backendManager.search(query)
             // 검색어 저장 이후 EditText 초기화 및 숨기기
             searchEditText.setText("")
-            searchEditText.visibility = View.GONE
+            locationViewModel.requestMoveCameraToFirstToilet()
         } else {
             Toast.makeText(this, "검색어를 입력하세요.", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // 검색어를 SharedPreferences에 저장
-    private fun saveSearchQuery(query: String) {
-        val editor = sharedPreferences.edit()
-        editor.putString("lastSearchQuery", query)
-        editor.apply()
 
-        // 저장된 검색어 값을 로그로 출력
-        Log.d("MainActivity", "Search query saved: $query")
-    }
-
-    // 검색어를 백엔드로 전송하는 함수
-    private fun sendSearchQueryToBackend(query: String) {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://your-backend-url.com") // 실제 백엔드 URL로 변경필요ㅇ
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val apiService = retrofit.create(ApiService::class.java)
-        val call = apiService.search(query)
-
-        call.enqueue(object : Callback<SearchResponse> {
-            override fun onResponse(call: Call<SearchResponse>, response: Response<SearchResponse>) {
-                if (response.isSuccessful) {
-                    val searchResults = response.body()?.results ?: emptyList()
-                    displaySearchResults(searchResults)
-                } else {
-                    Toast.makeText(this@MainActivity, "검색에 실패했습니다.", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
-                Toast.makeText(this@MainActivity, "네트워크 오류 발생", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    // 검색 결과를 UI에 표시하는 함수
-    private fun displaySearchResults(results: List<SearchResult>) {
-        if (results.isNotEmpty()) {
-            Toast.makeText(this, "첫 번째 결과: ${results[0].title}", Toast.LENGTH_LONG).show()
-            // RecyclerView 등을 사용하여 결과를 표시하세요.
-        } else {
-            Toast.makeText(this, "검색 결과가 없습니다.", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     // 주석: 사용자가 선택한 반경을 SharedPreferences에 저장하는 함수
     private fun saveRadiusSelection(checkBoxes: Array<CheckBox>): String? {
@@ -311,12 +262,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        backendManager.stopSendingRadiusData() // 액티비티 종료 시 데이터 전송 중지
     }
 
     override fun onPause() {
         super.onPause()
-        fusedLocationClient.removeLocationUpdates(locationCallback)
+        //fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     private fun checkLocationPermissions() {
