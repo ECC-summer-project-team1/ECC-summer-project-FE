@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -28,6 +29,7 @@ class ExploreFragment : Fragment() {
     private lateinit var locationViewModel: LocationViewModel
     private var kakaoMap: KakaoMap? = null
     private var locationLabel: Label? = null
+    private lateinit var backendManager: BackendManager
 
     private var isTracking = true  // 현재 트래킹 중인지 여부를 나타내는 플래그
 
@@ -44,6 +46,7 @@ class ExploreFragment : Fragment() {
 
         // ViewModel 초기화
         locationViewModel = ViewModelProvider(requireActivity()).get(LocationViewModel::class.java)
+        backendManager = BackendManager(requireContext(), locationViewModel)
 
         // MapView 초기화
         mapView = view.findViewById(R.id.map_view)
@@ -135,7 +138,17 @@ class ExploreFragment : Fragment() {
                 kakaoMap?.moveCamera(CameraUpdateFactory.newCenterPosition(newPosition))
                 // 라벨의 위치를 새 위치로 이동
                 locationLabel?.moveTo(newPosition)
+                backendManager.sendCurrentInfoOnce("500")
                 isTracking = true  // 버튼 클릭 시 트래킹 상태를 활성화
+            }
+        }
+
+        val findToiletButton: Button = view.findViewById(R.id.find_toilet_button)
+        findToiletButton.setOnClickListener {
+            kakaoMap?.cameraPosition?.let { cameraPosition ->
+                Log.d("ExploreFragment", "Camera Position: Latitude = ${cameraPosition.position.latitude}, Longitude = ${cameraPosition.position.longitude}")
+                val latLng = LatLng.from(cameraPosition.position.latitude, cameraPosition.position.longitude)
+                backendManager.sendCameraInfoOnce(latLng, "500")
             }
         }
     }

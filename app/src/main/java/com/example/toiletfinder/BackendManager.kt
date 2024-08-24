@@ -28,13 +28,21 @@ class BackendManager(
 
     private val apiService: ApiService = retrofit.create(ApiService::class.java)
 
-    fun sendCurrentInfoOnce(fileUri: Uri, radius: String) {
+    fun sendCurrentInfoOnce(radius: String) {
         CoroutineScope(Dispatchers.IO).launch {
             val latLng = viewModel.location.value
             if (latLng != null) {
-                sendCurrrentInfo(fileUri, latLng, radius)
+                sendCurrrentInfo(latLng, radius)
             }
             receiveDummyData() // 더미 데이터도 호출
+        }
+    }
+
+    //현재 위치 말고 드래그한 곳
+    fun sendCameraInfoOnce(latLng: LatLng, radius: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            sendCurrrentInfo(latLng, radius)
+            receiveDummyData2() // 더미 데이터도 호출
         }
     }
 
@@ -89,9 +97,60 @@ class BackendManager(
         }
     }
 
+    private suspend fun receiveDummyData2() {
+        Log.d("BackendManager", "Generating dummy data")
 
-    private fun sendCurrrentInfo(fileUri: Uri, latLng: LatLng, radius: String) {
-        val file = File(fileUri.path ?: "")
+        // 더미 데이터 생성
+        val dummyData2 = listOf(
+            ToiletInfo(
+                category = "공중화장실",
+                reference = "001",
+                toiletName = "오목공원 화장실",
+                addressRoad = "서울특별시 양천구 목동서로 159-2",
+                addressJibun = "서울특별시 양천구 목동서로 159-2",
+                maleToiletCount = 2,
+                femaleToiletCount = 3,
+                maleDisabledToiletCount = 1,
+                femaleDisabledToiletCount = 1,
+                maleChildToiletCount = 1,
+                femaleChildToiletCount = 1,
+                managingInstitution = "양천구청",
+                managingPhoneNumber = "02-123-4567",
+                openingHours = "06:00-22:00",
+                latitude = 37.5276,
+                longitude = 126.8737
+            ),
+            ToiletInfo(
+                category = "공중화장실",
+                reference = "002",
+                toiletName = "목동 교보문구 화장실",
+                addressRoad = "서울특별시 양천구 목동서로 159-1",
+                addressJibun = "서울특별시 양천구 목동서로 159-1",
+                maleToiletCount = 3,
+                femaleToiletCount = 4,
+                maleDisabledToiletCount = 1,
+                femaleDisabledToiletCount = 1,
+                maleChildToiletCount = 0,
+                femaleChildToiletCount = 1,
+                managingInstitution = "건물주",
+                managingPhoneNumber = "02-987-6543",
+                openingHours = "24시간",
+                latitude = 37.5283,
+                longitude = 126.875
+            )
+        )
+
+        // 더미 데이터를 ViewModel에 업데이트 (UI 스레드에서 실행)
+        withContext(Dispatchers.Main) {
+            Log.d("BackendManager", "Updating toilet list in ViewModel")
+            viewModel.toiletList.value = dummyData2
+        }
+    }
+
+
+
+    private fun sendCurrrentInfo(latLng: LatLng, radius: String) {
+        val file = File("")
         val requestFile =
             file.asRequestBody("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".toMediaTypeOrNull())
         val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
@@ -116,6 +175,8 @@ class BackendManager(
             }
         })
     }
+
+
 
     //정보를 받아오는 중
     fun fetchToiletData(latitude: Double, longitude: Double, radius: String) {

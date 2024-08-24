@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         //시작하자마자 기본적으로 전송함.
         val selectedRadius = saveRadiusSelection(checkBoxes)
         if (selectedRadius != null) {
-            backendManager.sendCurrentInfoOnce(fileUri, selectedRadius)
+            backendManager.sendCurrentInfoOnce(selectedRadius)
         }
 
         // "Near Me" 버튼 클릭 이벤트 설정
@@ -201,7 +201,7 @@ class MainActivity : AppCompatActivity() {
         applyRadius.setOnClickListener {
             val selectedRadius = saveRadiusSelection(checkBoxes)
             if (selectedRadius != null) {
-                backendManager.sendCurrentInfoOnce(fileUri, selectedRadius)
+                backendManager.sendCurrentInfoOnce(selectedRadius)
             } else {
                 Toast.makeText(this, "반경을 선택해주세요", Toast.LENGTH_SHORT).show()
             }
