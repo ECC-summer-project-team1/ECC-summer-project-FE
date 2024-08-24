@@ -1,5 +1,6 @@
 package com.example.toiletfinder
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -22,6 +23,7 @@ import com.kakao.vectormap.label.LabelStyle
 import com.kakao.vectormap.label.LabelStyles
 import com.kakao.vectormap.label.TransformMethod
 import com.kakao.vectormap.shape.Polygon
+import java.io.Serializable
 
 class ExploreFragment : Fragment() {
 
@@ -92,7 +94,7 @@ class ExploreFragment : Fragment() {
                             val toiletPosition = LatLng.from(toilet.latitude, toilet.longitude)
 
                             // 각 화장실 위치에 라벨을 추가합니다.
-                            labelLayer?.addLabel(
+                            val label = labelLayer?.addLabel(
                                 LabelOptions.from(toiletPosition)
                                     .setRank(10)
                                     .setStyles(
@@ -103,6 +105,8 @@ class ExploreFragment : Fragment() {
                                     )
                                     .setTransform(TransformMethod.AbsoluteRotation_Decal)
                             )
+                            // 추가 정보를 라벨에 저장 (예: 화장실 객체를 `tag`에 저장)
+                            label?.tag = toilet // 또는 다른 방식으로 화장실 정보를 저장할 수 있습니다.
                         }
                     }
                 }
@@ -112,6 +116,27 @@ class ExploreFragment : Fragment() {
                     if (gestureType == GestureType.Pan) {
                         isTracking = false
                     }
+                }
+
+                kakaoMap?.setOnLabelClickListener { kakaoMap, layer, label ->
+                    // 라벨에 저장된 정보를 가져옵니다.
+                    val toiletInfo = label.tag as? ToiletInfo // 라벨에서 화장실 정보를 가져옴
+
+                    if (toiletInfo != null) {
+                        // 현재 위치를 가져옵니다.
+                        val currentLocation = locationViewModel.location.value
+
+                        // ToiletDetailView로 이동하기 위한 Intent를 생성합니다.
+                        val context = requireContext()
+                        val intent = Intent(context, ToiletDetailView::class.java).apply {
+                            putExtra("toilet_info", toiletInfo as Serializable) // ToiletInfo를 Serializable로 전달
+                            putExtra("current_latitude", currentLocation?.latitude)
+                            putExtra("current_longitude", currentLocation?.longitude)
+                        }
+                        context.startActivity(intent)
+                    }
+
+                    true // 클릭 이벤트를 처리했음을 반환
                 }
             }
         })
