@@ -1,9 +1,0 @@
-<resources>
-    <string-array name="radius_options">
-        <item>반경 100m</item>
-        <item>반경 500m</item>
-        <item>반경 1km</item>
-        <item>반경 2km</item>
-        <item>반경 3km</item>
-    </string-array>
-</resources>

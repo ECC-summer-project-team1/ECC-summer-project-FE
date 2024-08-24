@@ -11,7 +11,8 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
-import android.widget.Button
+import android.view.inputmethod.EditorInfo
+import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -30,6 +31,16 @@ import com.kakao.vectormap.KakaoMapSdk
 import com.kakao.vectormap.LatLng
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import androidx.constraintlayout.widget.ConstraintLayout
+import android.view.MotionEvent
+import android.content.SharedPreferences
+import androidx.lifecycle.ViewModelProvider
+import retrofit2.*
+import retrofit2.converter.gson.GsonConverterFactory
+import okhttp3.ResponseBody
+import retrofit2.http.Body
+import retrofit2.http.POST
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,6 +52,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
 
+
+    // SharedPreferences
+    private lateinit var sharedPreferences: SharedPreferences
+
+
     private val locationPermissions = arrayOf(
         ACCESS_COARSE_LOCATION,
         ACCESS_FINE_LOCATION
@@ -51,10 +67,21 @@ class MainActivity : AppCompatActivity() {
     private lateinit var searchEditText: EditText
     private lateinit var searchButton: ImageButton
 
+    private lateinit var backendManager: BackendManager
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         KakaoMapSdk.init(this, BuildConfig.KAKAO_MAP_KEY)
         setContentView(R.layout.activity_main)
+
+        locationViewModel  = ViewModelProvider(this).get(LocationViewModel::class.java)
+        backendManager = BackendManager(this, locationViewModel )
+
+        //SharedPreferences 초기화
+        sharedPreferences = getSharedPreferences("RadiusPreferences", MODE_PRIVATE)
+
+        val fileUri: Uri = Uri.parse("file://path_to_your_file/yourfile.xlsx") // TODO: 실제 파일 경로로 수정
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -62,25 +89,32 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // ViewModel 초기화 (필요에 따라 초기화 방식 변경)
-        locationViewModel = LocationViewModel() // 혹은 ViewModelProvider를 사용하여 초기화
-
+        // 위치 권한 확인
         checkLocationPermissions()
+
         // EditText와 ImageButton 초기화
         searchEditText = findViewById(R.id.searchEditText)
         searchButton = findViewById(R.id.btnSearch)
 
-        // ImageButton 클릭 이벤트 처리
+        // 검색 버튼 클릭 이벤트 처리
         searchButton.setOnClickListener {
-            if (searchEditText.visibility == View.GONE) {
-                searchEditText.visibility = View.VISIBLE
+                executeSearch()
+        }
+        // Enter 키로 검색 실행
+        searchEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                executeSearch()
+                true  // 줄바꿈을 막고, 검색 동작을 실행
             } else {
-                searchEditText.visibility = View.GONE
+                false
             }
         }
 
+
+        // 초기 Fragment 설정
         setActive(ExploreFragment())
 
+        // 버튼 및 반경 설정 관련 UI 초기화 및 설정
         val buttonNearMe: Button = findViewById(R.id.button_nearme)
         val buttonExplore: Button = findViewById(R.id.button_explore)
         val btnRadius: Button = findViewById(R.id.btnRadius)
@@ -93,16 +127,40 @@ class MainActivity : AppCompatActivity() {
         val radius2km: CheckBox = findViewById(R.id.radius2km)
         val radius3km: CheckBox = findViewById(R.id.radius3km)
 
+        // 체크박스 배열로 관리
+        val checkBoxes = arrayOf(radius100m, radius500m, radius1km, radius2km, radius3km)
+        radius100m.isChecked = true //기본값으로 설정
+
+        // 체크박스 선택 시 다른 체크박스 해제
+        for (checkBox in checkBoxes) {
+            checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (isChecked) {
+                    // 현재 선택된 체크박스를 제외한 나머지 체크박스를 모두 해제
+                    checkBoxes.forEach { if (it != buttonView) it.isChecked = false }
+                }
+            }
+        }
+
+        //시작하자마자 기본적으로 전송함.
+        val selectedRadius = saveRadiusSelection(checkBoxes)
+        if (selectedRadius != null) {
+            backendManager.sendCurrentInfoOnce(selectedRadius)
+        }
+
+        // "Near Me" 버튼 클릭 이벤트 설정
         buttonNearMe.setOnClickListener {
             setActive(NearMeFragment())
         }
 
-        findViewById<Button>(R.id.button_explore).setOnClickListener {
+        // "Explore" 버튼 클릭 이벤트 설정
+        buttonExplore.setOnClickListener {
             setActive(ExploreFragment())
         }
 
+        // 위치 요청 및 콜백 설정
         locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 2000L)
-            .setMinUpdateIntervalMillis(2000L)
+            .setMinUpdateIntervalMillis(2000L) // 위치 업데이트 간격을 2초로 설정
+            .setMaxUpdateDelayMillis(2000L) // 최대 업데이트 지연 시간도 2초로 설정
             .build()
 
         locationCallback = object : LocationCallback() {
@@ -122,6 +180,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // 반경 설정 버튼 클릭 이벤트 설정
         btnRadius.setOnClickListener {
             if (radiusPopup.visibility == View.VISIBLE) {
                 radiusPopup.visibility = View.GONE
@@ -130,19 +189,62 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // 반경 초기화 버튼 클릭 이벤트 설정
         resetRadius.setOnClickListener {
-            radius100m.isChecked = false
-            radius500m.isChecked = false
-            radius1km.isChecked = false
-            radius2km.isChecked = false
-            radius3km.isChecked = false
+            checkBoxes.forEach { it.isChecked = false }
         }
 
+        // 반경 적용 버튼 클릭 이벤트 설정
         applyRadius.setOnClickListener {
-            // 반경설정 로직 추가
+            val selectedRadius = saveRadiusSelection(checkBoxes)
+            if (selectedRadius != null) {
+                backendManager.sendCurrentInfoOnce(selectedRadius)
+            } else {
+                Toast.makeText(this, "반경을 선택해주세요", Toast.LENGTH_SHORT).show()
+            }
             radiusPopup.visibility = View.GONE
         }
+        // 팝업 창 밖의 터치 이벤트 처리
+        val mainLayout: ConstraintLayout = findViewById(R.id.main)
+        mainLayout.setOnTouchListener { _, event ->
+            if (radiusPopup.visibility == View.VISIBLE && event.action == MotionEvent.ACTION_DOWN) {
+                radiusPopup.visibility = View.GONE
+            }
+            true
+        }
     }
+
+    // 검색어를 백엔드로 전송
+    private fun executeSearch() {
+        val query = searchEditText.text.toString().trim()
+        if (query.isNotEmpty()) {
+            backendManager.search(query)
+            // 검색어 저장 이후 EditText 초기화 및 숨기기
+            searchEditText.setText("")
+            locationViewModel.requestMoveCameraToFirstToilet()
+        } else {
+            Toast.makeText(this, "검색어를 입력하세요.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+
+    // 주석: 사용자가 선택한 반경을 SharedPreferences에 저장하는 함수
+    private fun saveRadiusSelection(checkBoxes: Array<CheckBox>): String? {
+        var selectedRadius: String? = null
+        val editor = sharedPreferences.edit()
+        for (checkBox in checkBoxes) {
+            if (checkBox.isChecked) {
+                selectedRadius = checkBox.text.toString()
+                editor.putString("selectedRadius", selectedRadius)
+                editor.apply()
+                Log.d("MainActivity", "Selected radius saved: $selectedRadius")
+                break
+            }
+        }
+        return selectedRadius
+    }
+
 
     private fun startLocationUpdates() {
         if (!requestingLocationUpdates) {
@@ -158,9 +260,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
     override fun onPause() {
         super.onPause()
-        fusedLocationClient.removeLocationUpdates(locationCallback)
+        //fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     private fun checkLocationPermissions() {
@@ -230,4 +336,5 @@ class MainActivity : AppCompatActivity() {
             .replace(R.id.content_frame, fragment)
             .commit()
     }
+
 }

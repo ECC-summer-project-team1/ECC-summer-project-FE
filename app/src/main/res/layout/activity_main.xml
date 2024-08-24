@@ -7,17 +7,16 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    
     <LinearLayout
         android:id="@+id/mainScreenLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
+
         <!-- 상단바 -->
         <LinearLayout
             android:id="@+id/topBar"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:background="@android:color/white"
@@ -25,18 +24,9 @@
             android:padding="1dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
-            android:layout_alignParentStart="true">
-
-            <Button
-                android:id="@+id/btnMap"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minWidth="36dp"
-                android:minHeight="28dp"
-                android:padding="4dp"
-                android:text="지도"
-                android:textColor="@color/black"
-                android:background="@drawable/button_background" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <Button
                 android:id="@+id/btnRadius"
@@ -44,27 +34,113 @@
                 android:layout_height="wrap_content"
                 android:minWidth="60dp"
                 android:minHeight="28dp"
-                android:padding="4dp"
+                android:padding="8dp"
                 android:text="반경 설정"
                 android:textColor="@color/black"
                 android:background="@drawable/button_background"
-                android:layout_marginStart="8dp" />
-
-
-            <View
+                android:layout_marginEnd="8dp" />
+            <!-- 서치 텍스트입력 박스 -->
+            <EditText
+                android:id="@+id/searchEditText"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/edittext_border"
+                android:hint="> 화장실검색"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:padding="8dp"
+                android:visibility="visible" />
+
 
             <ImageButton
                 android:id="@+id/btnSearch"
                 android:layout_width="48dp"
                 android:layout_height="32dp"
+                android:background="@color/white"
+                android:contentDescription="검색"
                 android:padding="4dp"
-                android:src="@drawable/search"
                 android:scaleType="fitCenter"
-                android:contentDescription="검색" />
+                android:src="@drawable/search" />
         </LinearLayout>
+
+        <!-- 반경 설정 팝업 -->
+        <LinearLayout
+            android:id="@+id/radiusPopup"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/popup_border"
+            android:elevation="8dp"
+            android:padding="16dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/topBar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- 100m 반경 체크박스 -->
+            <CheckBox
+                android:id="@+id/radius100m"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/radius_100m" />
+
+            <!-- 500m 반경 체크박스 -->
+            <CheckBox
+                android:id="@+id/radius500m"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/radius_500m" />
+
+            <!-- 1km 반경 체크박스 -->
+            <CheckBox
+                android:id="@+id/radius1km"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/radius_1km" />
+
+            <!-- 2km 반경 체크박스 -->
+            <CheckBox
+                android:id="@+id/radius2km"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/radius_2km" />
+
+            <!-- 3km 반경 체크박스 -->
+            <CheckBox
+                android:id="@+id/radius3km"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/radius_3km" />
+
+            <!-- 초기화 및 적용 버튼 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <Button
+                    android:id="@+id/resetRadius"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="초기화"
+                    android:background="@color/lightBlue2" />
+
+                <Button
+                    android:id="@+id/applyRadius"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="적용"
+                    android:background="@color/lightBlue" />
+            </LinearLayout>
+        </LinearLayout>
+
+
+
 
         <FrameLayout
             android:id="@+id/content_frame"
@@ -75,90 +151,10 @@
             <include
                 layout="@layout/activity_explore_fragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent" />
         </FrameLayout>
 
-
-
-        <!-- 반경 설정 팝업(? 메뉴 -->
-        <LinearLayout
-            android:id="@+id/radiusPopup"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/popup_border"
-            android:elevation="8dp"
-            android:padding="16dp"
-            android:visibility="gone"
-            android:layout_below="@id/topBar"
-            android:layout_centerHorizontal="true">
-
-            <!-- 100m 반경 체크박스 -->
-            <CheckBox
-                android:id="@+id/radius100m"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <!-- 500m 반경 체크박스 -->
-            <CheckBox
-                android:id="@+id/radius500m"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <!-- 1km 반경 체크박스 -->
-            <CheckBox
-                android:id="@+id/radius1km"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <!-- 2km 반경 체크박스 -->
-            <CheckBox
-                android:id="@+id/radius2km"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <!-- 3km 반경 체크박스 -->
-            <CheckBox
-                android:id="@+id/radius3km"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <!-- 초기화 및 적용 버튼 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp">
-
-                <Button
-                    android:id="@+id/resetRadius"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="초기화"
-                    android:background="@color/lightBlue"/>
-
-
-                <Button
-                    android:id="@+id/applyRadius"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="적용"
-                    android:background="@color/deepBlue"/>
-            </LinearLayout>
-
-            <!-- 서치 텍스트입력 박스 -->
-            <EditText
-                android:id="@+id/searchEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="검색"
-                android:visibility="gone"
-                android:padding="8dp"
-                android:layout_marginBottom="8dp" />
-
-        </LinearLayout>
+        <!-- 하단 버튼 레이아웃 -->
         <LinearLayout
             android:id="@+id/buttons_layout"
             android:layout_width="match_parent"
@@ -167,8 +163,7 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:padding="16dp"
-            android:layout_weight="10"
-            >
+            android:layout_weight="10">
 
             <Button
                 android:id="@+id/button_nearme"
@@ -180,7 +175,6 @@
                 android:text="Near Me"
                 android:textColor="#000000" />
 
-
             <Button
                 android:id="@+id/button_explore"
                 android:layout_width="0dp"
@@ -189,8 +183,7 @@
                 android:background="@color/white"
                 android:drawableTop="@drawable/ic_explore"
                 android:text="Explore"
-                android:textColor="#000000"/>
+                android:textColor="#000000" />
         </LinearLayout>
-
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -70,4 +70,8 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.4")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
+    implementation("androidx.fragment:fragment-ktx:1.3.6")
 }

@@ -2,47 +2,36 @@ package com.example.toiletfinder
 
 import android.os.Parcel
 import android.os.Parcelable
+import java.io.Serializable
 
 data class ToiletInfo(
-    val id: String,
-    val startTime: String,
-    val endTime: String,
-    val name: String,
-    val address: String,
-    val latitude: Double,
-    val longitude: Double
-) : Parcelable {
-    constructor(parcel: Parcel) : this(
-        parcel.readString() ?: "",
-        parcel.readString() ?: "",
-        parcel.readString() ?: "",
-        parcel.readString() ?: "",
-        parcel.readString() ?: "",
-        parcel.readDouble(),
-        parcel.readDouble()
-    )
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(id)
-        parcel.writeString(startTime)
-        parcel.writeString(endTime)
-        parcel.writeString(name)
-        parcel.writeString(address)
-        parcel.writeDouble(latitude)
-        parcel.writeDouble(longitude)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<ToiletInfo> {
-        override fun createFromParcel(parcel: Parcel): ToiletInfo {
-            return ToiletInfo(parcel)
-        }
-
-        override fun newArray(size: Int): Array<ToiletInfo?> {
-            return arrayOfNulls(size)
-        }
-    }
-}
+    val category: String = "",
+    val reference: String = "",
+    val toiletName: String = "",
+    val addressRoad: String = "",
+    val addressJibun: String = "",
+    val maleToiletCount: Int = 0,
+    val maleChildToiletCount: Int = 0,
+    val maleDisabledToiletCount: Int = 0,
+    val maleChildDisabledToiletCount: Int = 0,
+    val femaleToiletCount: Int = 0,
+    val femaleChildToiletCount: Int = 0,
+    val femaleDisabledToiletCount: Int = 0,
+    val femaleChildDisabledToiletCount: Int = 0,
+    val managingInstitution: String = "",
+    val managingPhoneNumber: String = "",
+    val openingHours: String = "",
+    val detailedOpeningHours: String = "",
+    val installationDate: String = "",
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
+    val ownershipType: String = "",
+    val wasteManagementType: String = "",
+    val safetyFacilityRequired: String = "",
+    val emergencyBell: String = "",
+    val emergencyCctv: String = "",
+    val diaperChangingStation: String = "",
+    val diaperChangingStationLocation: String = "",
+    val remodelingDate: String = "",
+    val dataStandardDate: String = ""
+) : Serializable

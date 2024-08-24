@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toilet_detail"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <!-- 이거는 api 나오면 넣을 예정. 일단 map이 들어갈 자리. -->
-  <!--  <fragment
-        android:layout_height="150dp"
+    <com.kakao.vectormap.MapView
+        android:id="@+id/detail_map_view"
         android:layout_width="match_parent"
-        />-->
+        android:layout_height="200dp"/>
 
     <TextView
         android:id="@+id/toilet_name"

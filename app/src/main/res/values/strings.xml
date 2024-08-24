@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">ToiletFinder</string>
+    <string name="radius_100m">반경 100m</string>
+    <string name="radius_500m">반경 500m</string>
+    <string name="radius_1km">반경 1km</string>
+    <string name="radius_2km">반경 2km</string>
+    <string name="radius_3km">반경 3km</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
